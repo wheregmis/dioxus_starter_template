@@ -1,10 +1,8 @@
 use dioxus::server::{DioxusRouterExt, ServeConfig};
-
 use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
 use ui::App;
 
-#[tokio::main]
-async fn main() {
+pub async fn run_server() {
     let address = dioxus::cli_config::fullstack_address_or_localhost();
 
     let session_store = MemoryStore::default();
@@ -19,4 +17,9 @@ async fn main() {
     let router = router.into_make_service();
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     axum::serve(listener, router).await.unwrap();
+}
+
+#[tokio::main]
+async fn main() {
+    run_server().await;
 }

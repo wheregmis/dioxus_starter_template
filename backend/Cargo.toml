@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-dioxus = { version = "0.7.0-alpha.3", features = ["server"] }
-axum = "0.8.4"
-tokio = "1.47.0"
-ui = { path = "../ui", features = ["server"] }
-tower-sessions = "0.14.0"
+dioxus = { workspace = true, features = ["server"] }
+axum = { workspace = true }
+tokio = { workspace = true }
+ui = { workspace = true, features = ["server"] }
+tower-sessions = { workspace = true }
