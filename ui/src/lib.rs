@@ -1,9 +1,9 @@
 #[cfg(feature = "server")]
 mod backend_ext;
 
-pub mod server_fns;
+pub mod features;
 
-use crate::server_fns::counter::get_counter;
+use crate::features::counter::CounterDisplay;
 use dioxus::prelude::*;
 
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -27,13 +27,14 @@ pub fn App() -> Element {
 
 #[component]
 fn Home() -> Element {
-    let current_counter = use_resource(move || async move { get_counter().await });
-
     rsx! {
-        match &*current_counter.read_unchecked() {
-            Some(Ok(counter)) => rsx! { div { "Counter yoho: {counter}" } },
-            Some(Err(e)) => rsx! { p { "Loading counter failed, {e}" } },
-            None =>  rsx! { p { "Loading..." } }
+        div {
+            class: "container mx-auto p-4",
+            h1 {
+                class: "text-2xl font-bold mb-4",
+                "Counter App"
+            }
+            CounterDisplay {}
         }
     }
 }
