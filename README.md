@@ -11,7 +11,6 @@ dioxus_starter_template/
 ├── backend/       # Server implementation and session management and server side entrypoint
 ├── frontend/      # Client-side application entry point
 ├── ui/           # Main Dioxus Fullstack Application
-└── target/       # Build artifacts
 ```
 
 ## 📁 Folder Structure

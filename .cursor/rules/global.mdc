@@ -1,34 +1,6 @@
 ---
 alwaysApply: true
 ---
-## 2. Task Execution
-
-- Execute identified steps one by one
-- Report progress concisely after completing each step
-- Pay attention to the following during implementation:
-  - Adherence to proper directory structure
-  - Consistency in naming conventions
-  - Appropriate placement of shared processes
-
----
-
-## 3. Quality Control and Problem Resolution
-
-- If context cannot be found use context7 MCP Server for latest dioxus docsite's documentation
-- Quickly verify the execution results of each task
-- If errors or inconsistencies occur, address them through the following process:
-  a. Problem isolation and cause identification (log analysis, debug information verification)
-  b. Creation and implementation of countermeasures
-  c. Post-fix operation verification
-  d. Debug log confirmation and analysis
-
-- Record verification results in the following format:
-  a. Verification items and expected results
-  b. Actual results and discrepancies
-  c. Required countermeasures (if applicable)
-
----
-
 ## 4. Final Confirmation
 
 - Evaluate the entire deliverable once all tasks are completed
@@ -77,7 +49,6 @@ markdown
 - **Do not make changes that are not explicitly instructed.** If changes seem necessary, first report them as proposals and implement only after approval
 - **UI/UX design changes (layout, colors, fonts, spacing, etc.) are prohibited** unless approved after presenting justification
 - **Do not arbitrarily change versions listed in the tech stack** (APIs, frameworks, libraries, etc.). If changes are necessary, clearly explain the reason and wait for approval before making any changes
-
 ---
 
 # Tech Stack
@@ -115,6 +86,80 @@ markdown
 *   **Prefer Feature-Specific:** Prioritize feature-level placement.
 
 Please adhere to the above content when executing tasks.
+
+This project uses a modular workspace structure with four main components:
+
+```
+dioxus_starter_template/
+├── backend/       # Server implementation and session management and server side entrypoint
+├── frontend/      # Client-side application entry point
+├── ui/           # Shared UI components and routing
+    ├── src/
+    │   ├── lib.rs              # Main App component and routing
+    │   ├── features/           # Feature-based modules
+    │   │   ├── counter/        # Counter feature
+    │   │   │   ├── data/       # Data layer (repositories, server functions)
+    │   │   │   │   └── repository.rs
+    │   │   │   ├── domain/     # Domain layer (entities, use cases)
+    │   │   │   │   ├── entity.rs
+    │   │   │   │   └── use_cases.rs
+    │   │   │   └── presentation/ # Presentation layer (UI components)
+    │   │   │       └── components.rs
+    │   │   └── mod.rs          # Feature module exports
+    │   ├── server_fns/         # Server functions (shared across features)
+    │   │   └── counter.rs
+    │   └── backend_ext/        # Backend extensions
+    │       └── req_parts_counter.rs
+    └── assets/                 # Static assets (CSS, icons, images)
+```
+
+## 📁 Folder Structure
+### `backend/` - Server Implementation
+- **Purpose**: Handles HTTP server, session management, and serves the Dioxus application
+- **Key Files**:
+  - `src/main.rs` - Server entry point with session configuration
+- **Features**:
+  - Axum-based HTTP server
+  - Tower sessions for state management
+  - Serves the Dioxus application
+
+### `frontend/` - Client Application
+- **Purpose**: Entry point for the client-side application
+- **Key Files**:
+  - `src/main.rs` - Launches the UI application
+  - `Dioxus.toml` - Dioxus configuration
+- **Features**:
+  - Web, desktop, and mobile platform support
+  - Hot reloading during development
+
+### `ui/` - Shared UI Components
+- **Purpose**: Contains the main application UI and routing logic with server functions
+- **Key Files**:
+  - `src/lib.rs` - Main App component and routing
+  - `assets/` - Static assets (CSS, icons, images)
+- **Features**:
+  - Router-based navigation
+  - Server-side rendering support
+  - Shared across all platforms
+
+For any potential features we want to extend it as a feature like:
+```
+dioxus_starter_template/
+├── backend/       # Server implementation and session management
+├── frontend/      # Client-side application entry point
+├── ui/           # Shared UI components and routing
+    ├── src/
+    │   ├── lib.rs              # Main App component and routing
+    │   ├── features/           # Feature-based modules
+    │   │   ├── counter/        # Counter feature
+    │   │   │   ├── data/       # Data layer (repositories)
+    │   │   │   ├── domain/     # Domain layer (entities, use cases)
+    │   │   │   └── presentation/ # Presentation layer (UI components)
+    │   │   └── mod.rs          # Feature module exports
+    │   ├── server_fns/         # Server functions (shared)
+    │   └── backend_ext/        # Backend extensions
+    └── assets/                 # Static assets
+```
 
 # Basic Dioxus Docs
 
@@ -374,6 +419,9 @@ Hydration is the process of making a server-rendered HTML page interactive on th
 
 ### Errors
 The initial UI rendered by the component on the client must be identical to the UI rendered on the server.
+
+* Use the `use_server_future` hook instead of `use_resource`. It runs the future on the server, serializes the result, and sends it to the client, ensuring the client has the data immediately for its first render.
+* Any code that relies on browser-specific APIs (like accessing `localStorage`) must be run *after* hydration. Place this code inside a `use_effect` hook.
 
 * Use the `use_server_future` hook instead of `use_resource`. It runs the future on the server, serializes the result, and sends it to the client, ensuring the client has the data immediately for its first render.
 * Any code that relies on browser-specific APIs (like accessing `localStorage`) must be run *after* hydration. Place this code inside a `use_effect` hook.
