@@ -8,25 +8,13 @@ This project uses a modular workspace structure with four main components:
 
 ```
 dioxus_starter_template/
-├── api/           # Shared API definitions and server functions
-├── backend/       # Server implementation and session management
+├── backend/       # Server implementation and session management and server side entrypoint
 ├── frontend/      # Client-side application entry point
-├── ui/           # Shared UI components and routing
+├── ui/           # Main Dioxus Fullstack Application
 └── target/       # Build artifacts
 ```
 
 ## 📁 Folder Structure
-
-### `api/` - Shared API Layer
-- **Purpose**: Contains server functions and shared types used by both frontend and backend
-- **Key Files**:
-  - `src/server_fns/counter.rs` - Server function for counter operations
-  - `src/backend_ext/req_parts_counter.rs` - Request extraction logic for sessions
-- **Features**: 
-  - Server functions with session management
-  - Request/response type definitions
-  - Shared between frontend and backend
-
 ### `backend/` - Server Implementation
 - **Purpose**: Handles HTTP server, session management, and serves the Dioxus application
 - **Key Files**:
@@ -46,7 +34,7 @@ dioxus_starter_template/
   - Hot reloading during development
 
 ### `ui/` - Shared UI Components
-- **Purpose**: Contains the main application UI and routing logic
+- **Purpose**: Contains the main application UI and routing logic with server functions
 - **Key Files**:
   - `src/lib.rs` - Main App component and routing
   - `assets/` - Static assets (CSS, icons, images)
@@ -75,28 +63,6 @@ dioxus_starter_template/
    ```
    This command runs both the frontend and backend with hot reloading.
 
-3. **Alternative: Run individual components**:
-   ```bash
-   # Frontend only
-   dx serve --package frontend --platform web
-   
-   # Backend only
-   cargo run --package backend
-   ```
-
-### Building for Production
-
-```bash
-# Build for web
-dx build --package frontend --platform web
-
-# Build for desktop
-dx build --package frontend --platform desktop
-
-# Build for mobile
-dx build --package frontend --platform mobile
-```
-
 ## 🔧 Key Features
 
 ### Session Management
@@ -105,7 +71,7 @@ dx build --package frontend --platform mobile
 - Session expiry after 10 seconds of inactivity
 
 ### Hot Reloading
-- Frontend and backend hot reloading during development
+- Frontend and backend hot reloading during development (Waiting for workspace hot reloading support)
 - Automatic recompilation on file changes
 
 ### Cross-Platform Support
@@ -150,11 +116,11 @@ The application currently features:
 ## 🔮 Future Enhancements
 
 Potential areas for expansion:
+- Component Integration
 - Database integration
 - Authentication system
-- More complex UI components
-- API rate limiting
-- Error handling improvements
+- More finetune cursor rules (which can be extracted into prompt.md for other)
+- Error handling improvements with thiserror
 - Testing infrastructure
 
 ## 📝 License
