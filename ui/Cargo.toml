@@ -10,10 +10,20 @@ axum = { workspace = true, optional = true }
 tower-sessions = { workspace = true, optional = true }
 tokio = { workspace = true, features = ["full"], optional = true }
 http = { workspace = true, optional = true }
+torii = { workspace = true, optional = true }
+torii-axum = { workspace = true, optional = true }
 
 [features]
 default = []
 web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
 mobile = ["dioxus/mobile"]
-server = ["dioxus/server", "axum", "tower-sessions", "tokio", "http"]
+server = [
+    "dioxus/server",
+    "axum",
+    "tower-sessions",
+    "tokio",
+    "http",
+    "torii",
+    "torii-axum",
+]

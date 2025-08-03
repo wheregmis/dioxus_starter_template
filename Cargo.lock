@@ -7010,6 +7010,8 @@ dependencies = [
  "http",
  "serde",
  "tokio",
+ "torii",
+ "torii-axum",
  "tower-sessions",
 ]
 

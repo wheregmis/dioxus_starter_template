@@ -57,21 +57,10 @@ pub async fn run_server() {
         .with_secure(false)
         .with_expiry(Expiry::OnInactivity(Duration::seconds(10)));
 
-    let additional_routes = Router::new()
-        .route("/magic-link", post(request_magic_link_handler))
-        .route("/magic-link/{token}", get(verify_magic_link_handler))
-        .with_state(torii.clone());
-
     let router = axum::Router::new()
         .serve_dioxus_application(ServeConfig::new().expect("Failed to load index"), App)
         .nest("/auth", auth_routes)
         .route("/tori", get(index_handler))
-        .route("/public", get(public_handler))
-        .route("/protected", get(protected_handler))
-        .route("/optional", get(optional_auth_handler))
-        .route("/bearer-only", get(bearer_only_handler))
-        .route("/token-info", get(token_info_handler))
-        .merge(additional_routes)
         .layer(session_layer)
         .layer(axum::middleware::from_fn_with_state(
             auth_state,
@@ -85,12 +74,7 @@ pub async fn run_server() {
     println!("Server starting on http://localhost:3000");
     println!("📧 Emails will be saved to ./emails/ directory");
     println!("Available endpoints:");
-    println!("  GET  /                    - Index page");
-    println!("  GET  /public              - Public endpoint");
-    println!("  GET  /protected           - Protected endpoint (requires authentication)");
-    println!("  GET  /optional            - Optional authentication endpoint");
-    println!("  GET  /bearer-only         - Bearer token only endpoint");
-    println!("  GET  /token-info          - Token information endpoint");
+    println!("  GET  /tori                    - Index page");
     println!(
         "  POST /auth/register                - Register new user (with automatic welcome email)"
     );
@@ -105,8 +89,6 @@ pub async fn run_server() {
     println!("  GET  /auth/session                 - Get current session");
     println!("  POST /auth/logout                  - Logout user");
     println!("  GET  /auth/health                  - Health check");
-    println!("  POST /magic-link                   - Request magic link (placeholder)");
-    println!("  GET  /magic-link/{{token}}           - Verify magic link (placeholder)");
     axum::serve(listener, router).await.unwrap();
 }
 
@@ -679,13 +661,6 @@ async fn index_handler(
     Html(html)
 }
 
-async fn public_handler() -> Json<Value> {
-    Json(json!({
-        "message": "This is a public endpoint - no authentication required",
-        "timestamp": chrono::Utc::now().to_rfc3339()
-    }))
-}
-
 async fn protected_handler(user: AuthUser) -> Json<Value> {
     println!("Protected endpoint accessed by user: {}", user.0.id);
 
@@ -699,178 +674,4 @@ async fn protected_handler(user: AuthUser) -> Json<Value> {
         },
         "timestamp": chrono::Utc::now().to_rfc3339()
     }))
-}
-
-async fn optional_auth_handler(user: OptionalAuthUser) -> Json<Value> {
-    match user.0 {
-        Some(user) => {
-            println!(
-                "Optional auth endpoint accessed by authenticated user: {}",
-                user.id
-            );
-            Json(json!({
-                "message": "This endpoint supports optional authentication",
-                "authenticated": true,
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "email_verified": user.is_email_verified(),
-                    "created_at": user.created_at
-                },
-                "timestamp": chrono::Utc::now().to_rfc3339()
-            }))
-        }
-        None => {
-            println!("Optional auth endpoint accessed by anonymous user");
-            Json(json!({
-                "message": "This endpoint supports optional authentication",
-                "authenticated": false,
-                "user": null,
-                "timestamp": chrono::Utc::now().to_rfc3339()
-            }))
-        }
-    }
-}
-
-async fn bearer_only_handler(bearer_token: SessionTokenFromBearer) -> Json<Value> {
-    match bearer_token.0 {
-        Some(token) => {
-            println!(
-                "Bearer-only endpoint accessed with token: {}",
-                token.as_str()
-            );
-            Json(json!({
-                "message": "This endpoint accepts Bearer tokens only",
-                "authenticated": true,
-                "token_received": true,
-                "token": token.as_str(),
-                "timestamp": chrono::Utc::now().to_rfc3339()
-            }))
-        }
-        None => {
-            println!("Bearer-only endpoint accessed without Bearer token");
-            Json(json!({
-                "message": "This endpoint requires a Bearer token",
-                "authenticated": false,
-                "token_received": false,
-                "error": "Authorization header with Bearer token required",
-                "timestamp": chrono::Utc::now().to_rfc3339()
-            }))
-        }
-    }
-}
-
-async fn token_info_handler(token_from_request: SessionTokenFromRequest) -> Json<Value> {
-    match token_from_request.0 {
-        Some(token) => {
-            println!(
-                "Token info endpoint accessed with token: {}",
-                token.as_str()
-            );
-            Json(json!({
-                "message": "Token information endpoint",
-                "authenticated": true,
-                "token_received": true,
-                "token": token.as_str(),
-                "note": "This endpoint accepts both Bearer tokens and cookies",
-                "timestamp": chrono::Utc::now().to_rfc3339()
-            }))
-        }
-        None => {
-            println!("Token info endpoint accessed without any token");
-            Json(json!({
-                "message": "Token information endpoint",
-                "authenticated": false,
-                "token_received": false,
-                "note": "This endpoint accepts both Bearer tokens and cookies",
-                "error": "No token provided via Authorization header or cookie",
-                "timestamp": chrono::Utc::now().to_rfc3339()
-            }))
-        }
-    }
-}
-
-// Request/Response types for additional endpoints
-#[derive(Deserialize)]
-struct MagicLinkRequest {
-    email: String,
-}
-
-#[derive(Serialize)]
-struct ApiResponse {
-    success: bool,
-    message: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    user_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    session_token: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    magic_token: Option<String>,
-}
-
-// Handler for requesting magic link
-async fn request_magic_link_handler(
-    State(torii): State<Arc<Torii<torii::seaorm::SeaORMRepositoryProvider>>>,
-    Json(req): Json<MagicLinkRequest>,
-) -> Result<Json<ApiResponse>, StatusCode> {
-    // Example of how magic link would work when storage backend is implemented
-    match torii
-        .magic_link()
-        .send_link(&req.email, "http://localhost:3000/magic-link")
-        .await
-    {
-        Ok(token) => {
-            println!("Magic link generated for email: {}", req.email);
-            Ok(Json(ApiResponse {
-                success: true,
-                message:
-                    "Magic link sent! Check your email (or ./emails/ directory in this example)."
-                        .to_string(),
-                user_id: None,
-                session_token: None,
-                magic_token: Some(token.token), // In production, don't return the actual token
-            }))
-        }
-        Err(e) => {
-            println!("Failed to generate magic link: {}", e);
-            Ok(Json(ApiResponse {
-                success: false,
-                message: format!(
-                    "Magic link functionality requires full implementation in storage backend: {e}"
-                ),
-                user_id: None,
-                session_token: None,
-                magic_token: None,
-            }))
-        }
-    }
-}
-
-// Handler for verifying magic link
-async fn verify_magic_link_handler(
-    State(torii): State<Arc<Torii<torii::seaorm::SeaORMRepositoryProvider>>>,
-    Path(token): Path<String>,
-) -> Result<Json<ApiResponse>, StatusCode> {
-    // Note: Magic link functionality requires full implementation in storage backend
-    println!("Magic link verification attempt for token: {}", token);
-
-    match torii.magic_link().authenticate(&token, None, None).await {
-        Ok((user, session)) => Ok(Json(ApiResponse {
-            success: true,
-            message: "Magic link verified successfully.".to_string(),
-            user_id: Some(user.id.to_string()),
-            session_token: Some(session.token.to_string()),
-            magic_token: None,
-        })),
-        Err(e) => {
-            println!("Failed to verify magic link: {}", e);
-            Ok(Json(ApiResponse {
-                success: false,
-                message: format!("Failed to verify magic link: {e}"),
-                user_id: None,
-                session_token: None,
-                magic_token: None,
-            }))
-        }
-    }
 }
