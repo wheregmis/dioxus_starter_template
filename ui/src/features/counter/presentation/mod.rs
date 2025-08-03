@@ -1,3 +1,3 @@
-pub mod components;
+pub mod counter_display;
 
-pub use components::*;
+pub use counter_display::*;

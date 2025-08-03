@@ -1,9 +1,12 @@
 [application]
 
+tailwind_input = "tailwind.css"
+tailwind_output = "../ui/assets/tailwind.css"
+
 [web.app]
 
 # HTML title tag content
-title = "frontend"
+title = "Dioxus Starter Template"
 
 # include `assets` in web platform
 [web.resource]

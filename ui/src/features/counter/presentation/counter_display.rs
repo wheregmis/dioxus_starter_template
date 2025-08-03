@@ -5,12 +5,26 @@ use dioxus::prelude::*;
 pub fn CounterDisplay() -> Element {
     let current_counter = use_resource(move || async move { GetCounterUseCase::execute().await });
 
+    let mut client_counter = use_signal(|| 0);
+
     rsx! {
+        div {
+            class: "p-4",
+            "ClientCounter: {client_counter.read()}"
+        }
+        button {
+            onclick: move |_| *client_counter.write() += 1,
+            "Increment Client Counter"
+        }
+        button {
+            onclick: move |_| *client_counter.write() -= 1,
+            "Decrement Client Counter"
+        }
         match &*current_counter.read_unchecked() {
             Some(Ok(counter)) => rsx! {
                 div {
                     class: "p-4",
-                    "Counter value: {counter.value}"
+                    "ServerCounter: {counter.value}"
                 }
             },
             Some(Err(e)) => rsx! {
