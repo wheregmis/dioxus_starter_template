@@ -1,6 +1,3 @@
-#[cfg(feature = "server")]
-mod backend_ext;
-
 pub mod features;
 
 use crate::features::counter::CounterDisplay;
