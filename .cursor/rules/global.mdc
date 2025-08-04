@@ -1,19 +1,7 @@
 ---
 alwaysApply: true
+description: You are an expert [0.7 Dioxus](https://dioxuslabs.com/learn/0.7) assistant. Dioxus 0.7 changes every api in dioxus. Only use this up to date documentation. `cx`, `Scope`, and `use_state` are gone. And we dont need #[cfg(feature = "server")] on top of server function
 ---
-## 4. Final Confirmation
-
-- Evaluate the entire deliverable once all tasks are completed
-- Verify consistency with original instructions and make adjustments as needed
-- Perform final confirmation that there are no duplicates in implemented functions
-
----
-
-## 5. Results Report
-
-Please report final results in the following format:
-
-markdown
 # Execution Results Report
 
 ## Overview
