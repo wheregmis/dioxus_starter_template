@@ -60,7 +60,7 @@ pub async fn run_server() {
     let router = axum::Router::new()
         .serve_dioxus_application(ServeConfig::new().expect("Failed to load index"), App)
         .nest("/auth", auth_routes)
-        .route("/tori", get(index_handler))
+        .route("/", get(index_handler))
         .layer(session_layer)
         .layer(axum::middleware::from_fn_with_state(
             auth_state,
